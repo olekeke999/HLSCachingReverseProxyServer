@@ -1,4 +1,4 @@
-import GCDWebServer
+import ReadiumGCDWebServer
 import PINCache
 
 open class HLSCachingReverseProxyServer {

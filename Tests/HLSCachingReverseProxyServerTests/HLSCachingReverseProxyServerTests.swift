@@ -1,7 +1,7 @@
 import AVFoundation
 import XCTest
 
-import GCDWebServer
+import ReadiumGCDWebServer
 import Nimble
 import PINCache
 import SafeCollection

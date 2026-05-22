@@ -9,7 +9,7 @@ import SafeCollection
 import HLSCachingReverseProxyServer
 
 final class HLSCachingReverseProxyServerTests: XCTestCase {
-  private var webServer: GCDWebServer!
+  private var webServer: ReadiumGCDWebServer!
   private var urlSession: URLSession!
   private var cache: PINCache!
   private var server: HLSCachingReverseProxyServer!
@@ -18,7 +18,7 @@ final class HLSCachingReverseProxyServerTests: XCTestCase {
     super.setUp()
     URLProtocolSpy.register()
 
-    self.webServer = GCDWebServer()
+    self.webServer = ReadiumGCDWebServer()
     self.cache = PINCache.shared
     self.cache.removeAllObjects()
     self.urlSession = URLSession.shared //(configuration: .default)

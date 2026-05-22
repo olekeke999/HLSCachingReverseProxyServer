@@ -4,13 +4,13 @@ import PINCache
 open class HLSCachingReverseProxyServer {
   static let originURLKey = "__hls_origin_url"
 
-  private let webServer: GCDWebServer
+  private let webServer: ReadiumGCDWebServer
   private let urlSession: URLSession
   private let cache: PINCaching
 
   private(set) var port: Int?
 
-  public init(webServer: GCDWebServer, urlSession: URLSession, cache: PINCaching) {
+  public init(webServer: ReadiumGCDWebServer, urlSession: URLSession, cache: PINCaching) {
     self.webServer = webServer
     self.urlSession = urlSession
     self.cache = cache
@@ -59,23 +59,23 @@ open class HLSCachingReverseProxyServer {
   }
 
   private func addPlaylistHandler() {
-    self.webServer.addHandler(forMethod: "GET", pathRegex: "^/.*\\.m3u8$", request: GCDWebServerRequest.self) { [weak self] request, completion in
+    self.webServer.addHandler(forMethod: "GET", pathRegex: "^/.*\\.m3u8$", request: ReadiumGCDWebServerRequest.self) { [weak self] request, completion in
       guard let self = self else {
-        return completion(GCDWebServerDataResponse(statusCode: 500))
+        return completion(ReadiumGCDWebServerDataResponse(statusCode: 500))
       }
 
       guard let originURL = self.originURL(from: request) else {
-        return completion(GCDWebServerErrorResponse(statusCode: 400))
+        return completion(ReadiumGCDWebServerErrorResponse(statusCode: 400))
       }
 
       let task = self.urlSession.dataTask(with: originURL) { data, response, error in
         guard let data = data, let response = response else {
-          return completion(GCDWebServerErrorResponse(statusCode: 500))
+          return completion(ReadiumGCDWebServerErrorResponse(statusCode: 500))
         }
 
         let playlistData = self.reverseProxyPlaylist(with: data, forOriginURL: originURL)
         let contentType = response.mimeType ?? "application/x-mpegurl"
-        completion(GCDWebServerDataResponse(data: playlistData, contentType: contentType))
+        completion(ReadiumGCDWebServerDataResponse(data: playlistData, contentType: contentType))
       }
 
       task.resume()
@@ -83,26 +83,26 @@ open class HLSCachingReverseProxyServer {
   }
 
   private func addSegmentHandler() {
-    self.webServer.addHandler(forMethod: "GET", pathRegex: "^/.*\\.ts$", request: GCDWebServerRequest.self) { [weak self] request, completion in
+    self.webServer.addHandler(forMethod: "GET", pathRegex: "^/.*\\.ts$", request: ReadiumGCDWebServerRequest.self) { [weak self] request, completion in
       guard let self = self else {
-        return completion(GCDWebServerDataResponse(statusCode: 500))
+        return completion(ReadiumGCDWebServerDataResponse(statusCode: 500))
       }
 
       guard let originURL = self.originURL(from: request) else {
-        return completion(GCDWebServerErrorResponse(statusCode: 400))
+        return completion(ReadiumGCDWebServerErrorResponse(statusCode: 400))
       }
 
       if let cachedData = self.cachedData(for: originURL) {
-        return completion(GCDWebServerDataResponse(data: cachedData, contentType: "video/mp2t"))
+        return completion(ReadiumGCDWebServerDataResponse(data: cachedData, contentType: "video/mp2t"))
       }
 
       let task = self.urlSession.dataTask(with: originURL) { data, response, error in
         guard let data = data, let response = response else {
-          return completion(GCDWebServerErrorResponse(statusCode: 500))
+          return completion(ReadiumGCDWebServerErrorResponse(statusCode: 500))
         }
 
         let contentType = response.mimeType ?? "video/mp2t"
-        completion(GCDWebServerDataResponse(data: data, contentType: contentType))
+        completion(ReadiumGCDWebServerDataResponse(data: data, contentType: contentType))
 
         self.saveCacheData(data, for: originURL)
       }
@@ -111,7 +111,7 @@ open class HLSCachingReverseProxyServer {
     }
   }
 
-  private func originURL(from request: GCDWebServerRequest) -> URL? {
+  private func originURL(from request: ReadiumGCDWebServerRequest) -> URL? {
     guard let encodedURLString = request.query?[Self.originURLKey] else { return nil }
     guard let urlString = encodedURLString.removingPercentEncoding else { return nil }
     let url = URL(string: urlString)

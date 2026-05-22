@@ -26,7 +26,7 @@ let package = Package(
             name: "HLSCachingReverseProxyServer",
             dependencies: [
                 .product(name: "PINCache", package: "PINCache"),
-                .product(name: "GCDWebServer", package: "GCDWebServer"),
+                .product(name: "ReadiumGCDWebServer", package: "GCDWebServer"),
             ]
         ),
         .testTarget(
@@ -36,7 +36,7 @@ let package = Package(
                 "Nimble",
                 "SafeCollection",
                 .product(name: "PINCache", package: "PINCache"),
-                .product(name: "GCDWebServer", package: "GCDWebServer"),
+                .product(name: "ReadiumGCDWebServer", package: "GCDWebServer"),
             ]
         ),
     ]
